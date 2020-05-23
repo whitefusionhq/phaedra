@@ -1,3 +1,5 @@
+require "json"
+require "webrick"
 require "active_support/core_ext/hash/indifferent_access"
 require "phaedra/concerns/callbacks_actionable"
 
