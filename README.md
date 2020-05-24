@@ -2,7 +2,7 @@
 
 _NOTE: not yet released! Check back in June 2020!_
 
-Phaedra is a REST microframework based on WEBrick which lets you write serverless Ruby functions. These can be tested locally and deployed to a serverless hosting platform such as [Vercel](https://vercel.com).
+Phaedra is a REST microframework based on WEBrick which lets you write serverless Ruby functions. These can be tested locally and deployed to a supported serverless hosting platform. Compatibility is presently focused on [Vercel](https://vercel.com), but there are likely additional platforms we'll be adding support for in the future.
 
 ## Installation
 
