@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Jared White"]
   spec.email         = ["jared@whitefusion.io"]
 
-  spec.summary       = %q{Write serverless Ruby functions via a REST microframework based on WEBrick.}
+  spec.summary       = %q{Write serverless Ruby functions via a REST microframework compatible with Rack or WEBrick.}
   spec.description   = spec.summary
   spec.homepage      = "https://github.com/whitefusionhq/phaedra"
   spec.license       = "MIT"
@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency "activesupport", "~> 6.0"
+  spec.add_runtime_dependency "rack", "~> 2.0"
   
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake", "~> 12.0"

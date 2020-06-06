@@ -1,6 +1,7 @@
 require "phaedra/version"
 
-module Phaedra
-end
+require "webrick"
+require "rack"
 
 require "phaedra/base"
+require "phaedra/rack_app"

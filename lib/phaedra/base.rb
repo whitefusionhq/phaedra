@@ -4,21 +4,31 @@ require "active_support/core_ext/hash/indifferent_access"
 require "phaedra/concerns/callbacks_actionable"
 
 module Phaedra
-  class Base < WEBrick::HTTPServlet::AbstractServlet
+  class Base
     include CallbacksActionable
+
+    # Used by WEBrick
+    def self.get_instance(server, *options)
+      self.new(server, *options)
+    end
+
+    # Context might be a WEBrick server, nil if coming from Rack
+    def initialize(context = nil)
+      @context = context
+    end
 
     ######################
     # Override in subclass
     def get(params)
-      raise HTTPStatus::NotFound, "`#{request.path}' not found."
+      raise WEBrick::HTTPStatus::NotFound, "`#{request.path}' not found."
     end
 
     def post(params)
-      raise HTTPStatus::NotFound, "`#{request.path}' not found."
+      raise WEBrick::HTTPStatus::NotFound, "`#{request.path}' not found."
     end
 
     def put(params)
-      raise HTTPStatus::NotFound, "`#{request.path}' not found."
+      raise WEBrick::HTTPStatus::NotFound, "`#{request.path}' not found."
     end
 
     def patch(params)
@@ -26,12 +36,22 @@ module Phaedra
     end
 
     def delete(params)
-      raise HTTPStatus::NotFound, "`#{request.path}' not found."
+      raise WEBrick::HTTPStatus::NotFound, "`#{request.path}' not found."
     end
     ######################
 
     def request; @req; end
     def response; @res; end
+
+    def service(req, res)
+      method_name = "do_" + req.request_method.gsub(/-/, "_")
+      if respond_to?(method_name)
+        __send__(method_name, req, res)
+      else
+        raise WEBrick::HTTPStatus::MethodNotAllowed,
+              "unsupported method `#{req.request_method}'."
+      end
+    end
 
     def do_GET(req, res)
       @req = req
@@ -42,10 +62,10 @@ module Phaedra
       result = run_callbacks :action do
         # WEBrick's query string handler with DELETE is funky
         params = if @req.request_method == "DELETE"
-                  WEBrick::HTTPUtils::parse_query(@req.query_string)
-                else
-                  @req.query
-                end
+                   WEBrick::HTTPUtils::parse_query(@req.query_string)
+                 else
+                   @req.query
+                 end
 
         @res.body = call_method_action(params)
       end
@@ -62,10 +82,18 @@ module Phaedra
       set_initial_status
 
       result = run_callbacks :action do
-        params = if @req.header["content-type"].to_s.include?("multipart/form-data")
-          @req.query
+        params = if (@req.header["content-type"] || @req.header["content_type"]).to_s.include?("multipart/form-data")
+          if @req.respond_to?(:params) # Rack
+            @req.params
+          else
+            @req.query # WEBrick
+          end
         else
-          JSON.parse(@req.body)
+          begin
+            JSON.parse(@req.body)
+          rescue JSON::ParserError, TypeError
+            @req.body
+          end
         end
 
         @res.body = call_method_action(params)
