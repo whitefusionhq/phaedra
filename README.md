@@ -1,7 +1,5 @@
 # Phaedra: Serverless Ruby Functions
 
-_NOTE: not yet released! Check back in June 2020!_
-
 Phaedra is a web microframework for writing serverless Ruby functions. They are isolated pieces of logic which respond to HTTP requests (GET, POST, etc.) and typically get mounted at a particular URL path. They can be tested locally and deployed to a supported serverless hosting platform or to any [Rack-compatible web server](https://github.com/rack/rack).
 
 Serverless compatibility is presently focused on [Vercel](https://vercel.com), but there are likely additional platforms we'll be adding support for in the future (OpenFaaS, Fission, etc.).
