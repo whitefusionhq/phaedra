@@ -6,7 +6,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Jared White"]
   spec.email         = ["jared@whitefusion.io"]
 
-  spec.summary       = %q{Write serverless Ruby functions via a REST microframework compatible with Rack or WEBrick.}
+  spec.summary       = %q{Write serverless Ruby functions via a REST-like microframework compatible with Rack or WEBrick.}
   spec.description   = spec.summary
   spec.homepage      = "https://github.com/whitefusionhq/phaedra"
   spec.license       = "MIT"
