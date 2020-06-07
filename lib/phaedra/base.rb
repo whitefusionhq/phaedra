@@ -112,7 +112,7 @@ module Phaedra
 
     def set_initial_status
       @res.status = 200
-      @res["Content-Type"] = 'application/json'
+      @res["Content-Type"] = "application/json"
     end
 
     def call_method_action(params)
@@ -121,7 +121,11 @@ module Phaedra
     end
 
     def complete_response
-      @res.body = @res.body.to_json if @res["Content-Type"] == "application/json"
+      if @res.body.is_a?(String) && !@res["Content-Type"].start_with?("text/")
+        @res["Content-Type"] = "text/plain"
+      elsif @res["Content-Type"] == "application/json"
+        @res.body = @res.body.to_json
+      end
     end
 
     def error_condition

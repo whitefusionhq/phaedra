@@ -4,7 +4,6 @@ class PhaedraFunction < Phaedra::Base
   before_action :earlier_stuff
 
   def get(params)
-    response["Content-Type"] = 'text/plain; charset=utf-8'
     "The Current Time is: #{Time.new} and Search Param is #{params[:search]}."
   end
 

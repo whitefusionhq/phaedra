@@ -2,7 +2,7 @@
 
 Phaedra is a web microframework for writing serverless Ruby functions. They are isolated pieces of logic which respond to HTTP requests (GET, POST, etc.) and typically get mounted at a particular URL path. They can be tested locally and deployed to a supported serverless hosting platform or to any [Rack-compatible web server](https://github.com/rack/rack).
 
-Serverless compatibility is presently focused on [Vercel](https://vercel.com), but there are likely additional platforms we'll be adding support for in the future (OpenFaaS, Fission, etc.).
+Serverless compatibility is presently focused on [Vercel](https://vercel.com) and [OpenFaaS](https://openfaas.com), but there are likely additional platforms we'll be adding support for in the future.
 
 ## Installation
 
@@ -30,7 +30,7 @@ Functions are single Ruby files which respond to a URL path (aka `/api/path/to/f
 
 Functions are written as subclasses of `Phaedra::Base` using the name `PhaedraFunction`. The `params` argument is a Hash containing the parsed contents of the incoming query string, form data, or body JSON. The response object returned by your function is typically a Hash which will be transformed into JSON output automatically, but it can also be plain text.
 
-Some platforms require the function class name to be `Handler`, so you can put that at the bottom of your file for full compatibility.
+Some platforms such as Vercel require the function class name to be `Handler`, so you can put that at the bottom of your file for full compatibility.
 
 Here's a basic example:
 
@@ -77,6 +77,55 @@ end
 
 You can modify the `request` object in a `before_action` callback to perform setup tasks before the actions are executed, or you can modify `response` in a `after_action` to further process the response.
 
+## OpenFaaS
+
+We recommend using OpenFaaS' [ruby-http template](https://github.com/openfaas-incubator/ruby-http). It boots up a Sinatra/WEBrick server and then passes all requests along to a Handler object.
+
+In your OpenFaaS project's function folder (e.g., `testphaedra`), simply define a file `handler.rb` which will load Phaedra's default Rack app:
+
+```ruby
+# testphaedra/handler.rb
+
+require "phaedra"
+
+class Handler
+  def run(_body, env)
+    status, headers, body = Phaedra::RackApp.new({
+      "root_dir" => File.join(Dir.pwd, "function")
+    }).call(env)
+
+    # The OpenFaaS ruby-http return array is backwards from Rack :/
+    [body.join(""), headers, status]
+  end
+end
+```
+
+Next, add a YAML file that lives alongside your function folder:
+
+```yaml
+# testphaedra.yml
+
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://127.0.0.1:8080
+functions:
+  testphaedra:
+    lang: ruby-http
+    handler: ./testphaedra
+    image: yourdockerusername/testphaedra:latest
+```
+
+Now run `faas-cli up -f testphaedra.yml` to build and deploy the function. Given the Ruby function `testphaedra/api/run-me.rb`, you'd call it like so:
+
+```sh
+curl http://127.0.0.1:8080/function/testphaedra/api/run-me
+
+# output of the Ruby function
+```
+
+In case you're wondering: yes, with Phaedra you can write multiple Ruby functions accessible via different URL paths that will all get handled by a single OpenFaaS function. Obviously you're welcome to set up multiple Phaedra projects and deploy them as separate OpenFaaS functions if you wish.
+
 ## Rack
 
 Booting Phaedra up as Rack app is very simple. All you need is a `config.ru` file alongside your `api` folder:
@@ -103,13 +152,13 @@ server.mount_proc "/#{base_api_folder}" do |req, res|
   ruby_path = File.join(full_api_path, api_folder, "#{endpoint}.rb")
 
   if File.exist?(ruby_path)
-    original_verbosity = $VERBOSE
-    $VERBOSE = nil
+    if Object.constants.include?(:PhaedraFunction)
+      Object.send(:remove_const, :PhaedraFunction)
+    end
     load ruby_path
-    $VERBOSE = original_verbosity
 
-    handler = Handler.new(server)
-    handler.service(req, res)
+    func = PhaedraFunction.new
+    func.service(req, res)
   else
     raise HTTPStatus::NotFound, "`#{req.path}' not found."
   end

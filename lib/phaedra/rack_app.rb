@@ -33,10 +33,10 @@ module Phaedra
       endpoint = File.basename(req.path)
       ruby_path = File.join(full_api_path, api_folder, "#{endpoint}.rb")
       if File.exist?(ruby_path)
-        original_verbosity = $VERBOSE
-        $VERBOSE = nil
+        if Object.constants.include?(:PhaedraFunction)
+          Object.send(:remove_const, :PhaedraFunction)
+        end
         load ruby_path
-        $VERBOSE = original_verbosity
         
         func = PhaedraFunction.new
         func.service(req, res)
