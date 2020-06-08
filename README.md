@@ -226,6 +226,26 @@ The settings (and their defaults) you can pass to the `new` method are as follow
 }
 ```
 
+Wondering if you can deploy a static site with an `api` folder via Nginx + Passenger? Yes, you can! Just configure your `my_site.conf` file like so:
+
+```nginxconf
+server {
+    listen 80;
+    server_name www.domain.com;
+
+    # Tell Nginx and Passenger where your site destination folder is
+    root /home/me/my_site/output;
+
+    # Turn on Passenger
+    location /api {
+      passenger_enabled on;
+      passenger_ruby /usr/local/rvm/gems/ruby-2.6.6@mysite/wrappers/ruby;
+    }
+}
+```
+
+Change the `server_name`, `root`, and `passenger_ruby` paths to your particular setup and you'll be good to go. (If you run into any errors, double-check there's a `config.ru` in the parent folder of your site destination folder.)
+
 ### WEBrick
 
 Integrating Phaedra into a WEBrick server is pretty straightforward. Given a `server` object, it can be accomplished thusly:
