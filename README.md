@@ -89,13 +89,14 @@ require_relative "../lib/shared_code"
 
 class PhaedraFunction < Phaedra::Base
   def get(params)
-    "Run it once! #{SharedCode.run_once}"
+    "Run it once! #{SharedCode.run_once} / #{Time.now}"
   end
 end
 ```
 
 ```ruby
 # lib/shared_code.rb
+
 module SharedCode
   def self.run_once
     @one_time ||= Time.now
@@ -103,7 +104,9 @@ module SharedCode
 end
 ```
 
-Now each time you invoke the function at `/api/run-it-once`, the timestamp will never change until the next redeployment.
+Now each time you invoke the function at `/api/run-it-once`, the first timestamp will never change until the next redeployment.
+
+**NOTE:** When running in a Rack-based configuration (see below), Ruby's `load` method is invoked for every request to any Phaedra function. This means Ruby has to parse and compile the code in your function each time. For small functions this happens extremely quickly, but if you find yourself writing a large function and seeing some performance slowdowns, consider extracting most of the function code to additional Ruby files and use the `require_relative` technique as mentioned above. The Ruby code in those required files will only be compiled once and all classes/modules/etc. will be saved in memory until the next redeployment.
 
 ## Deployment
 
@@ -212,7 +215,7 @@ require "phaedra"
 run Phaedra::RackApp.new
 ```
 
-Then run `rackup` in the terminal.
+Then run `rackup` in the terminal, or use another Rack-compatible server like Puma or Passenger.
 
 The settings (and their defaults) you can pass to the `new` method are as follows:
 
