@@ -113,28 +113,70 @@ All you have to do is create a static site repo ([Bridgetown](https://www.bridge
 
 ### OpenFaaS
 
-We recommend using OpenFaaS' [ruby-http template](https://github.com/openfaas-incubator/ruby-http). It boots up a Sinatra/WEBrick server and then passes all requests along to a Handler object.
+We recommend using OpenFaaS' dockerfile template so you can define your own `Dockerfile` to book Rack and Phaedra. This also allows you to customize the Docker image configuration to install and configure other tools as necessary.
 
-In your OpenFaaS project's function folder (e.g., `testphaedra`), simply define `handler.rb` which will in turn load Phaedra's default Rack app:
+First, make sure you've pulled down the template:
+
+```sh
+faas-cli template store pull dockerfile
+```
+
+Then add a `Dockerfile` to your OpenFaaS project's function folder (e.g., `testphaedra`):
+
+```dockerfile
+# testphaedra/Dockerfile
+
+FROM openfaas/of-watchdog:0.7.7 as watchdog
+
+FROM ruby:2.6.6-slim-stretch
+
+COPY --from=watchdog /fwatchdog /usr/bin/fwatchdog
+RUN chmod +x /usr/bin/fwatchdog
+
+ARG ADDITIONAL_PACKAGE
+RUN apt-get update \
+  && apt-get install -qy --no-install-recommends build-essential ${ADDITIONAL_PACKAGE}
+
+WORKDIR /home/app
+
+# Use cache layer for Gemfile
+COPY Gemfile   	.
+RUN bundle install
+RUN gem install puma -N
+
+# Copy over the rest
+COPY    .   .
+
+# Create a non-root user
+RUN addgroup --system app \
+    && adduser --system --ingroup app app
+RUN chown app:app -R /home/app
+USER app
+
+# Run Puma as the server process
+ENV fprocess="puma -p 5000"
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=2s CMD [ -e /tmp/.lock ] || exit 1
+
+ENV upstream_url="http://127.0.0.1:5000"
+ENV mode="http"
+
+CMD ["fwatchdog"]
+```
+
+Next add the `config.ru` file to boot Rack:
 
 ```ruby
-# testphaedra/handler.rb
+# testphaedra/config.ru
 
 require "phaedra"
 
-class Handler
-  def run(_body, env)
-    status, headers, body = Phaedra::RackApp.new({
-      "root_dir" => File.join(Dir.pwd, "function")
-    }).call(env)
-
-    # The OpenFaaS ruby-http return array is backwards from Rack :/
-    [body.join(""), headers, status]
-  end
-end
+run Phaedra::RackApp.new
 ```
 
-Next, add a YAML file that lives alongside your function folder:
+Finally, add a YAML file that lives alongside your function folder:
 
 ```yaml
 # testphaedra.yml
@@ -145,10 +187,12 @@ provider:
   gateway: http://127.0.0.1:8080
 functions:
   testphaedra:
-    lang: ruby-http
+    lang: dockerfile
     handler: ./testphaedra
     image: yourdockerusername/testphaedra:latest
 ```
+
+(Replace `yourdockerusername` with your [Docker Hub](https://hub.docker.com) username.)
 
 Now run `faas-cli up -f testphaedra.yml` to build and deploy the function. Given the Ruby function `testphaedra/api/run-me.rb`, you'd call it like so:
 
