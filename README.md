@@ -77,7 +77,7 @@ end
 
 You can modify the `request` object in a `before_action` callback to perform setup tasks before the actions are executed, or you can modify `response` in a `after_action` to further process the response.
 
-## Shared Code You Only Want to Run Once
+### Shared Code You Only Want to Run Once
 
 You can use `require_relative` to load and execute shared Ruby code from another folder, say `lib`. This is particularly useful when setting up a database connection or performing expensive operations you only want to do once, rather than for every request.
 
@@ -113,7 +113,7 @@ All you have to do is create a static site repo ([Bridgetown](https://www.bridge
 
 ### OpenFaaS
 
-We recommend using OpenFaaS' dockerfile template so you can define your own `Dockerfile` to book Rack and Phaedra. This also allows you to customize the Docker image configuration to install and configure other tools as necessary.
+We recommend using OpenFaaS' dockerfile template so you can define your own `Dockerfile` to book Rack + Phaedra using the Puma web server. This also allows you to customize the Docker image configuration to install and configure other tools as necessary.
 
 First, make sure you've pulled down the template:
 
