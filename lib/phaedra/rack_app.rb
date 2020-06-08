@@ -11,7 +11,7 @@ module Phaedra
     end
 
     def body
-      @request_body ||= get_header(Rack::RACK_INPUT).read
+      @request_body ||= "" + get_header(Rack::RACK_INPUT).read
     end
   end
 
