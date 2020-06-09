@@ -122,7 +122,7 @@ module Phaedra
 
     def complete_response
       if @res.body.is_a?(String) && !@res["Content-Type"].start_with?("text/")
-        @res["Content-Type"] = "text/plain"
+        @res["Content-Type"] = "text/plain; charset=utf-8"
       elsif @res["Content-Type"] == "application/json"
         @res.body = @res.body.to_json
       end
