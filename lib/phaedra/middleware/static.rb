@@ -6,7 +6,7 @@ module Phaedra
     class Static
       def initialize(app, options)
         @app = app
-        @try = [".html", "index.html", "/index.html"] #, *options[:try]]
+        @try = ["", ".html", "index.html", "/index.html", *options[:try]]
         @static = Rack::Static.new(
           lambda { |_| [404, {}, []] },
           options)
