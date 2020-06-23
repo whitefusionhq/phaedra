@@ -1,3 +1,6 @@
+require "rack"
+require "phaedra"
+
 module Phaedra
   class Request < Rack::Request
     def query

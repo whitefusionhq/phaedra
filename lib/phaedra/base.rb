@@ -7,6 +7,10 @@ module Phaedra
   class Base
     include CallbacksActionable
 
+    before_action do
+      Initializers.run
+    end
+
     # Used by WEBrick
     def self.get_instance(server, *options)
       self.new(server, *options)
@@ -112,7 +116,7 @@ module Phaedra
 
     def set_initial_status
       @res.status = 200
-      @res["Content-Type"] = "application/json"
+      @res["Content-Type"] = "application/json; charset=utf-8"
     end
 
     def call_method_action(params)
@@ -123,7 +127,7 @@ module Phaedra
     def complete_response
       if @res.body.is_a?(String) && !@res["Content-Type"].start_with?("text/")
         @res["Content-Type"] = "text/plain; charset=utf-8"
-      elsif @res["Content-Type"] == "application/json"
+      elsif @res["Content-Type"].start_with? "application/json"
         @res.body = @res.body.to_json
       end
     end

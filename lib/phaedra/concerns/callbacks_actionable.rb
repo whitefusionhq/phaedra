@@ -11,14 +11,14 @@ module Phaedra
     end
 
     module ClassMethods
-      def before_action(*args)
-        set_callback :action, :before, *args
+      def before_action(*args, &block)
+        set_callback :action, :before, *args, &block
       end
-      def after_action(*args)
-        set_callback :action, :after, *args
+      def after_action(*args, &block)
+        set_callback :action, :after, *args, &block
       end
-      def around_action(*args)
-        set_callback :action, :around, *args
+      def around_action(*args, &block)
+        set_callback :action, :around, *args, &block
       end
     end
   end
