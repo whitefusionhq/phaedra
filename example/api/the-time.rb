@@ -1,10 +1,10 @@
-require "phaedra"
+require_relative "../phaedra/initializers"
 
 class PhaedraFunction < Phaedra::Base
   before_action :earlier_stuff
 
   def get(params)
-    "The Current Time is: #{Time.new} and Search Param is #{params[:search]}."
+    "The ?search param is #{params[:search]}"
   end
 
   def post(params)
