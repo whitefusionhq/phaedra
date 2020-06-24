@@ -118,7 +118,13 @@ All you have to do is create a static site repo ([Bridgetown](https://www.bridge
 
 We recommend using OpenFaaS' dockerfile template so you can define your own `Dockerfile` to book Rack + Phaedra using the Puma web server. This also allows you to customize the Docker image configuration to install and configure other tools as necessary.
 
-First, make sure you've pulled down the template:
+First make sure you've added Puma to your Gemfile:
+
+```
+gem "puma"
+```
+
+Then make sure you've pulled down the OpenFaaS template:
 
 ```sh
 faas-cli template store pull dockerfile
@@ -174,7 +180,7 @@ Next add the `config.ru` file to boot Rack:
 ```ruby
 # testphaedra/config.ru
 
-require "phaedra"
+require "phaedra/rack_app"
 
 run Phaedra::RackApp.new
 ```
@@ -210,7 +216,7 @@ In case you're wondering: yes, with Phaedra you can write multiple Ruby function
 Booting Phaedra up as Rack app is very simple. All you need to do is add a `config.ru` file alongside your `api` folder:
 
 ```ruby
-require "phaedra"
+require "phaedra/rack_app"
 
 run Phaedra::RackApp.new
 ```
