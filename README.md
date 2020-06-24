@@ -2,9 +2,13 @@
 
 Phaedra is a web microframework for writing serverless Ruby functions. They are isolated pieces of logic which respond to HTTP requests (GET, POST, etc.) and typically get mounted at a particular URL path. They can be tested locally and deployed to a supported serverless hosting platform, using a container via Docker & Docker Compose, or to any [Rack-compatible web server](https://github.com/rack/rack).
 
+Phaedra is well-suited for building an API layer which you attach to a static site (aka [the Jamstack](https://www.bridgetownrb.com/docs/jamstack)) to provide dynamic functionality accessible any time after the static site loads in the browser.
+
 Serverless compatibility is presently focused on [Vercel](https://vercel.com) and [OpenFaaS](https://openfaas.com), but there are likely additional platforms we'll be adding support for in the future.
 
 For swift deployment via Docker, we recommend [Fly.io](https://fly.io).
+
+(P.S. Wondering how you can deploy a static site on [Netlify](https://www.netlify.com) and still use a Ruby API? Scroll down for a suggested approach!)
 
 ## Installation
 
@@ -359,6 +363,20 @@ load File.join(Dir.pwd, "api", "func.rb")
 ```
 
 This method precludes any automatic routing by Phaedra, so it's discouraged unless you are using WEBrick within a larger setup that utilizes its own routing method. (Interestingly enough, [that's how Vercel works under the hood](https://github.com/vercel/vercel/blob/master/packages/now-ruby/now_init.rb).)
+
+## Connecting a Static Site on Netlify to a Phaedra API
+
+[Netlify](https://www.netlify.com) is a popular hosting solution for Jamstack (static) sites, but its serverless functions feature doesn't support Ruby. However, using proxy rewrites, you can deploy the static site part of your repository to Netlify and set the `/api` endpoint to route requests to your Phaedra app on the fly (hosted elsewhere).
+
+For example, if your Phaedra app is hosted on Fly.io (see above), you'll want Netlify's CDN to proxy all requests to `/api/*` to that app's URL. We can accomplish that by adding a `_redirects` file to the static site's source folder (for Bridgetown sites, that's `src`):
+
+```
+/api/*  https://super-awesome-phaedra-api.fly.dev/api/:splat  200
+```
+
+Once that deploys, you can go to your Netlify site URL, append `/api/whatever`, and under-the-hood that will connect to `https://super-awesome-phaedra-api.fly.dev/api/whatever` in a completely transparent manner.
+
+If you want to change the proxy URL for different contexts (staging vs. production, etc.), you can follow Netlify's "[Separate _redirects files for separate contexts or branches](https://community.netlify.com/t/support-guide-making-redirects-work-for-you-troubleshooting-and-debugging/13433)" instructions here.
 
 ----
 
