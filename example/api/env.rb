@@ -3,7 +3,12 @@ require_relative "../phaedra/initializers"
 class PhaedraFunction < Phaedra::Base
   def get(params)
     response["Content-Type"] = "text/html; charset=utf-8"
-    "<p>😁 #{Phaedra.the_time} - #{ENV["PHAEDRA_ENV"]} - #{Time.new}</p>"
+    <<~HTML
+      <p>Hello! 😃</p>
+      <p>Startup Time: #{Phaedra::Shared.the_time}</p>
+      <p>Environment: #{Phaedra.environment}</p>
+      <p>Current Time: #{Time.new}</p>
+    HTML
   end
 end
 
