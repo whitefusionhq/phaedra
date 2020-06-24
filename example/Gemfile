@@ -1,4 +1,4 @@
 source "https://rubygems.org"
 
-gem "phaedra", path: ".."
+gem "phaedra"
 gem "puma"
