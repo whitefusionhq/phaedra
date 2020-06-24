@@ -358,7 +358,7 @@ load File.join(Dir.pwd, "api", "func.rb")
 @server.mount '/path', Handler
 ```
 
-This method precludes any automatic routing by Phaedra, so it's discouraged unless you are using WEBrick within a larger setup that utilizes its own routing method. (Interestingly enough, that's how Vercel works under the hood.)
+This method precludes any automatic routing by Phaedra, so it's discouraged unless you are using WEBrick within a larger setup that utilizes its own routing method. (Interestingly enough, [that's how Vercel works under the hood](https://github.com/vercel/vercel/blob/master/packages/now-ruby/now_init.rb).)
 
 ----
 
