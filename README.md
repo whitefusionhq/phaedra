@@ -1,8 +1,10 @@
 # Phaedra: Serverless Ruby Functions
 
-Phaedra is a web microframework for writing serverless Ruby functions. They are isolated pieces of logic which respond to HTTP requests (GET, POST, etc.) and typically get mounted at a particular URL path. They can be tested locally and deployed to a supported serverless hosting platform, in a container via Docker & Docker Compose, or to any [Rack-compatible web server](https://github.com/rack/rack).
+Phaedra is a web microframework for writing serverless Ruby functions. They are isolated pieces of logic which respond to HTTP requests (GET, POST, etc.) and typically get mounted at a particular URL path. They can be tested locally and deployed to a supported serverless hosting platform, using a container via Docker & Docker Compose, or to any [Rack-compatible web server](https://github.com/rack/rack).
 
 Serverless compatibility is presently focused on [Vercel](https://vercel.com) and [OpenFaaS](https://openfaas.com), but there are likely additional platforms we'll be adding support for in the future.
+
+For swift deployment via Docker, we recommend [Fly.io](https://fly.io).
 
 ## Installation
 
@@ -282,6 +284,42 @@ server {
 ```
 
 Change the `server_name`, `root`, and `passenger_ruby` paths to your particular setup and you'll be good to go. (If you run into any errors, double-check there's a `config.ru` in the parent folder of your site destination folder.)
+
+### Docker
+
+[In the example app provided](https://github.com/whitefusionhq/phaedra/tree/master/example), there is a `config.ru` file for booting it up as a Rack app using Puma. The `Dockerfile` and `docker-compose.yml` files allow you to easily build and deploy the app at port 8080 (but that can easily be changed). Using the Docker Compose commands:
+
+```sh
+# Build (if necessary) and deploy:
+docker-compose up
+
+# Get information on the running container:
+docker-compose ps
+
+# Inspect the output logs:
+docker-compose logs
+
+# Exit the running container:
+docker-compose down
+
+# If you make changes to the code and need to rebuild:
+docker-compose up --build
+```
+
+#### Fly.io
+
+Deploying your Phaedra app's Docker container via [Fly.io](https://fly.io) couldn't be easier. Simply create a new app and deploy using Fly.io's command line utility:
+
+```sh
+# Create the new app using your Fly.io account:
+flyctl apps create
+
+# Deploy using the Dockerfile:
+flyctl deploy
+
+# Print out the URL and other info on your new app:
+flyctl info
+```
 
 ### WEBrick
 

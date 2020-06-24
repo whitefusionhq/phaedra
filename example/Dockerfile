@@ -17,7 +17,7 @@ ARG DOCKER_USER=${DOCKER_USER:-user}
 ARG APP_DIR=${APP_DIR:-/home/user/phaedra-app}
 
 # Change with --build-arg PHAEDRA_ENV=production
-ARG PHAEDRA_ENV=staging
+ARG PHAEDRA_ENV=development
 ENV PHAEDRA_ENV=$PHAEDRA_ENV
 
 # Create a non-root user
