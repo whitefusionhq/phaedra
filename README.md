@@ -1,6 +1,6 @@
 # Phaedra: Serverless Ruby Functions
 
-Phaedra is a web microframework for writing serverless Ruby functions. They are isolated pieces of logic which respond to HTTP requests (GET, POST, etc.) and typically get mounted at a particular URL path. They can be tested locally and deployed to a supported serverless hosting platform or to any [Rack-compatible web server](https://github.com/rack/rack).
+Phaedra is a web microframework for writing serverless Ruby functions. They are isolated pieces of logic which respond to HTTP requests (GET, POST, etc.) and typically get mounted at a particular URL path. They can be tested locally and deployed to a supported serverless hosting platform, in a container via Docker & Docker Compose, or to any [Rack-compatible web server](https://github.com/rack/rack).
 
 Serverless compatibility is presently focused on [Vercel](https://vercel.com) and [OpenFaaS](https://openfaas.com), but there are likely additional platforms we'll be adding support for in the future.
 
@@ -24,18 +24,26 @@ Or install it yourself as:
 $ gem install phaedra
 ```
 
+## Examples
+
+[Here's an example](https://github.com/whitefusionhq/phaedra/tree/master/example) of what the structure of a typical Phaedra app looks like. It includes `config.ru` for booting it up as a Rack app using Puma, as well as a `Dockerfile` and `docker-compose.yml` so you can run the app containerized in virtually any development or production hosting environment.
+
+[Here's a demo](https://phaedra-demo.whitefusion.design/api/env) of one of the functions. [And another one.](https://phaedra-demo.whitefusion.design/api/params?search=Waiting%20for%20Guffman)
+
 ## Usage
 
 Functions are single Ruby files which respond to a URL path (aka `/api/path/to/function`). The path is determined by the location of the file on the filesystem relative to the functions root (aka `api`). So, given a path of `./api/folder/run-me.rb`, the URL path would be `/api/folder/run-me`.
 
 Functions are written as subclasses of `Phaedra::Base` using the name `PhaedraFunction`. The `params` argument is a Hash containing the parsed contents of the incoming query string, form data, or body JSON. The response object returned by your function is typically a Hash which will be transformed into JSON output automatically, but it can also be plain text.
 
+Code to be run once upon function initialization and shared between multiple functions should be placed in the `phaedra/initializers.rb` file (see more on that below).
+
 Some platforms such as Vercel require the function class name to be `Handler`, so you can put that at the bottom of your file for full compatibility.
 
 Here's a basic example:
 
 ```ruby
-require "phaedra"
+require_relative "../phaedra/initializers"
 
 class PhaedraFunction < Phaedra::Base
   def get(params)
@@ -60,17 +68,23 @@ Functions can define `action` callbacks:
 ```ruby
 class PhaedraFunction < Phaedra::Base
   before_action :do_stuff_before
-  after_action :do_stuff_after
+  after_action do
+    # process response object further...
+  end
   around_action :do_it_all_around
 
   def do_stuff_before
-    # code
+    # process request object before action handler...
   end
 
-  # do_stuff_after, etc.
+  def do_it_all_around
+    # run code before
+    yield
+    # run code after
+  end
 
   def get(params)
-    # this will be run within the callback chain
+    # this will be run within the entire callback chain
   end
 end
 ```
@@ -79,34 +93,51 @@ You can modify the `request` object in a `before_action` callback to perform set
 
 ### Shared Code You Only Want to Run Once
 
-You can use `require_relative` to load and execute shared Ruby code from another folder, say `lib`. This is particularly useful when setting up a database connection or performing expensive operations you only want to do once, rather than for every request.
+Phaedra provides a default location to place shared modules and code that should be run once upon first deployment of your functions. This is particularly useful when setting up a database connection or performing expensive operations you only want to do once, rather than for every request.
+
+Here's an example of how that works:
 
 ```ruby
 # api/run-it-once.rb
 
-require "phaedra"
-require_relative "../lib/shared_code"
+require_relative "../phaedra/initializers"
 
 class PhaedraFunction < Phaedra::Base
   def get(params)
-    "Run it once! #{SharedCode.run_once} / #{Time.now}"
+    "Run it once! #{Phaedra::Shared.run_once} / #{Time.now}"
   end
 end
 ```
 
 ```ruby
-# lib/shared_code.rb
+# phaedra/initializers.rb
 
-module SharedCode
-  def self.run_once
-    @one_time ||= Time.now
+module Phaedra
+  module Shared
+    Initializers.register self do
+      run_once
+    end
+
+    def self.run_once
+      @only_once ||= Time.now
+    end
   end
 end
 ```
 
-Now each time you invoke the function at `/api/run-it-once`, the first timestamp will never change until the next redeployment.
+Now each time you invoke the function at `/api/run-it-once`, the timestamp will never change until the next redeployment.
 
-**NOTE:** When running in a Rack-based configuration (see below), Ruby's `load` method is invoked for every request to any Phaedra function. This means Ruby has to parse and compile the code in your function each time. For small functions this happens extremely quickly, but if you find yourself writing a large function and seeing some performance slowdowns, consider extracting most of the function code to additional Ruby files and use the `require_relative` technique as mentioned above. The Ruby code in those required files will only be compiled once and all classes/modules/etc. will be saved in memory until the next redeployment.
+**NOTE:** When running in a Rack-based configuration (see below), Ruby's `load` method is invoked for every request to any Phaedra function. This means Ruby has to parse and compile the code in your function each time. For small functions this happens extremely quickly, but if you find yourself writing a large function and seeing some performance slowdowns, consider extracting most of the function code to additional Ruby files and using the `require_relative` technique as mentioned above. The Ruby code in those required files will only be compiled once and all classes/modules/etc. will be saved in memory until the next redeployment.
+
+## Environment
+
+You can set the environment of your Phaedra app using the `PHAEDRA_ENV` environment variable. That is then available via the `Phaedra.environment` method. By default, the value is `:development`.
+
+```ruby
+# ENV["PHAEDRA_ENV"] == "production"
+
+Phaedra.environment == :production  # true
+```
 
 ## Deployment
 

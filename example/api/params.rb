@@ -4,7 +4,7 @@ class PhaedraFunction < Phaedra::Base
   before_action :earlier_stuff
 
   def get(params)
-    "The ?search param is #{params[:search] || "-missing-"}"
+    "The ?search= param is #{params[:search] || "-missing-"}"
   end
 
   def post(params)
