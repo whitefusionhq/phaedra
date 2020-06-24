@@ -319,6 +319,9 @@ flyctl deploy
 
 # Print out the URL and other info on your new app:
 flyctl info
+
+# Change the Phaedra app environment:
+flyctl secrets set PHAEDRA_ENV=production
 ```
 
 ### WEBrick
