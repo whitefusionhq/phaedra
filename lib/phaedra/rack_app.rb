@@ -8,9 +8,16 @@ module Phaedra
     end
 
     def header
-      @env.dup.transform_keys do |key|
+      @transformed_headers ||= @env.dup.transform_keys do |key|
         key.respond_to?(:downcase) ? key.downcase : key
+      end.tap do |headers|
+        # TODO: normalize a few common headers
+        headers["authorization"] = headers["http_authorization"]
       end
+    end
+
+    def [](key)
+      header[key]
     end
 
     def body
