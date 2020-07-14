@@ -32,7 +32,7 @@ $ gem install phaedra
 
 ## Examples
 
-[Here's an example](https://github.com/whitefusionhq/phaedra/tree/master/example) of what the structure of a typical Phaedra app looks like. It includes `config.ru` for booting it up as a Rack app using Puma, as well as a `Dockerfile` and `docker-compose.yml` so you can run the app containerized in virtually any development or production hosting environment.
+[Here's an example](https://github.com/whitefusionhq/phaedra/tree/main/example) of what the structure of a typical Phaedra app looks like. It includes `config.ru` for booting it up as a Rack app using Puma, as well as a `Dockerfile` and `docker-compose.yml` so you can run the app containerized in virtually any development or production hosting environment.
 
 [Here's a demo](https://phaedra-demo.whitefusion.design/api/env) of one of the functions. [And another one.](https://phaedra-demo.whitefusion.design/api/params?search=Waiting%20for%20Guffman)
 
@@ -291,7 +291,7 @@ Change the `server_name`, `root`, and `passenger_ruby` paths to your particular 
 
 ### Docker
 
-[In the example app provided](https://github.com/whitefusionhq/phaedra/tree/master/example), there is a `config.ru` file for booting it up as a Rack app using Puma. The `Dockerfile` and `docker-compose.yml` files allow you to easily build and deploy the app at port 8080 (but that can easily be changed). Using the Docker Compose commands:
+[In the example app provided](https://github.com/whitefusionhq/phaedra/tree/main/example), there is a `config.ru` file for booting it up as a Rack app using Puma. The `Dockerfile` and `docker-compose.yml` files allow you to easily build and deploy the app at port 8080 (but that can easily be changed). Using the Docker Compose commands:
 
 ```sh
 # Build (if necessary) and deploy:
@@ -394,4 +394,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the Phaedra project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/whitefusionhq/phaedra/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the Phaedra project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/whitefusionhq/phaedra/blob/main/CODE_OF_CONDUCT.md).
