@@ -1,3 +1,8 @@
+**Update 10/15/2020:** While I'm not ready to totally throw in the towel, I've mostly given up on persuing this kind of approach. Messing around with serverless is fun, but I'm finding it difficult to find any truly groundbreaking uses for it that couldn't be sufficiantly handled by traditional approaches. Spin up a minimalist Rails API, add a Dockerfile, deploy to Fly.io, or Render, or even Heroku, or maybe DigitalOcean's new App Platform, etc.…it's pretty straightforward. So I'll leave this up for a while and welcome further thoughts, but for now I'm sticking with Rails for a backend stack. –[@jaredcwhite](https://github.com/jaredcwhite)
+
+
+----
+
 # Phaedra: Serverless Ruby Functions
 
 Phaedra is a web microframework for writing serverless Ruby functions. They are isolated pieces of logic which respond to HTTP requests (GET, POST, etc.) and typically get mounted at a particular URL path. They can be tested locally and deployed to a supported serverless hosting platform, using a container via Docker & Docker Compose, or to any [Rack-compatible web server](https://github.com/rack/rack).
